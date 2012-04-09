@@ -1,74 +1,66 @@
 #!/bin/bash
 #
-# Installs Ruby 1.9.3, Nodejs 0.6.14, Mongodb and Nginx with Passenger
+# Install: Ruby 1.9.3, Nodejs 0.6.14, Mongodb and Nginx with Passenger
+# Reference: https://www.linode.com/stackscripts/view/?StackScriptID=1291
 #
 # <UDF name="rr_env" Label="Rails/Rack environment to run" default="production" />
 # <UDF name="deploy_user" Label="Username of deploy user" default="deploy" />
 
 source <ssinclude StackScriptID=1>
 
-function log {
-  echo "$1 `date '+%D %T'`" >> log.txt
-}
+exec &> /root/stackscript.log
 
 # Update packages and install essentials
     cd /tmp
+    echo "Start to install! Good Luck!"
     system_update
-    log "System updated"
     apt-get -y install build-essential zlib1g-dev libssl-dev libreadline5-dev openssh-server libyaml-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libpcre3 libpcre3-dev
     goodstuff
-    log "Essentials installed"
+    echo "Essentials installed"
 
 # Install nodejs for javascript runtime
     export NODEJS_VERSION="v0.6.14"
-    log "Installing Nodejs $NODEJS_VERSION"
-    log "Downloading: (from calling wget http://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION.tar.gz)"
-    log `wget http://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION.tar.gz`
-    log "tar output:"
-    log `tar xzf node-$NODEJS_VERSION.tar.gz`
+    echo "Installing Nodejs $NODEJS_VERSION"
+    echo "Downloading: (from calling wget http://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION.tar.gz)"
+    wget http://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION.tar.gz
+    echo "Extracting the file"
+    tar xzf node-$NODEJS_VERSION.tar.gz
     cd node-$NODEJS_VERSION
-    log "current directory: `pwd`"
-    log ""
-    log "Nodejs Configuration output: (from calling ./configure)"
-    log `./configure`
-    log "Nodejs make output: (form calling make)"
-    log `make`
-    log ""
-    log "Ruby make install output: (from calling make install)"
-    log `make install`
+    echo "current directory: `pwd`"
+    echo "Nodejs Configuration output: (from calling ./configure)"
+    ./configure
+    echo "Nodejs make output: (form calling make)"
+    make
+    echo "Nodejs make install output: (from calling make install)"
+    make install
     cd ..
-    log "Nodejs installed"
+    echo "Nodejs installed"
 
 # Installing Ruby
     export RUBY_VERSION="ruby-1.9.3-p125"
-    log "Installing Ruby $RUBY_VERSION"
-    log "Downloading: (from calling wget http://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz)"
-    log `wget http://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz` 
-    log "tar output:"
-    log `tar xzf $RUBY_VERSION.tar.gz`
-    rm "$RUBY_VERSION.tar.gz"
+    echo "Installing Ruby $RUBY_VERSION"
+    echo "Downloading: (from calling wget http://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz)"
+    wget http://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz
+    echo "tar output:"
+    tar xzf $RUBY_VERSION.tar.gz
     cd $RUBY_VERSION
-    log "current directory: `pwd`"
-    log ""
-    log "Ruby Configuration output: (from calling ./configure)"
-    log `./configure`
-    log ""
-    log "Ruby make output: (from calling make)"
-    log `make` 
-    log ""
-    log "Ruby make install output: (from calling make install)"
-    log `make install`
+    echo "current directory: `pwd`"
+    echo "Ruby Configuration output: (from calling ./configure)"
+    ./configure
+    echo "Ruby make output: (from calling make)"
+    make
+    echo "Ruby make install output: (from calling make install)"
+    make install
     cd ..
-    rm -rf $RUBY_VERSION
-    log "Ruby installed!"
+    echo "Ruby installed!"
 
 # Set up Nginx and Passenger
-    log "Installing Nginx and Passenger"
+    echo "Installing Nginx and Passenger"
     gem install passenger
     passenger-install-nginx-module --auto --auto-download --prefix="/usr/local/nginx"
 
 # Install git
-    log "Installing Git"
+    echo "Installing Git"
     apt-get -y install git-core
 
 # Set up rails environment
@@ -83,9 +75,8 @@ EOF
 # Installing Rails 3
     gem update --system
     # Install rails
-    log "Installing Rails3"
-    log `gem install rails --no-ri --no-rdoc`
-    log "Rails installed!"
+    echo "Installing Rails3 and gems"
+    gem install rails --no-ri --no-rdoc
     #Install sqlite
     apt-get -y install sqlite3 libsqlite3-dev
     gem install sqlite3-ruby --no-ri --no-rdoc
@@ -93,21 +84,19 @@ EOF
     gem install mongoid bson_ext
 
 # Install mongodb
-    log "Installing Mongodb"
+    echo "Installing Mongodb"
     apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
     echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" >> /etc/apt/sources.list
     apt-get update
     apt-get install mongodb-10gen
-    log "Mongodb installed!"
 
 # Add deploy user
-    log "Add deploy user: $DEPLOY_USER"
+    echo "Add deploy user: $DEPLOY_USER"
     echo "$DEPLOY_USER:$DEPLOY_USER:1000:1000::/home/$DEPLOY_USER:/bin/bash" | newusers
     cp -a /etc/skel/.[a-z]* /home/$DEPLOY_USER/
     chown -R $DEPLOY_USER /home/$DEPLOY_USER
     # Add to sudoers without password
     echo "$DEPLOY_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-# Split & polish
-    restartServices
-    log "StackScript Finished!"
+# Finished
+    echo "StackScript Finished!"
