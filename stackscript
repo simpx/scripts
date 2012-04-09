@@ -79,7 +79,7 @@ EOF
     gem install rails --no-ri --no-rdoc
     #Install sqlite
     apt-get -y install sqlite3 libsqlite3-dev
-    gem install sqlite3-ruby --no-ri --no-rdoc
+    gem install sqlite3 --no-ri --no-rdoc
     #Install mongo gem
     gem install mongoid bson_ext
 
