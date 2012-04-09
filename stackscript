@@ -56,7 +56,7 @@ exec &> /root/stackscript.log
 
 # Set up Nginx and Passenger
     echo "Installing Nginx and Passenger"
-    gem install passenger
+    gem install passenger --no-ri --no-rdoc
     passenger-install-nginx-module --auto --auto-download --prefix="/usr/local/nginx"
 
 # Install git
@@ -81,7 +81,7 @@ EOF
     apt-get -y install sqlite3 libsqlite3-dev
     gem install sqlite3 --no-ri --no-rdoc
     #Install mongo gem
-    gem install mongoid bson_ext
+    gem install mongoid bson_ext --no-ri --no-rdoc
 
 # Install mongodb
     echo "Installing Mongodb"
