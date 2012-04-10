@@ -86,6 +86,13 @@ exec &> /root/stackscript.log
     echo "Installing Nginx and Passenger"
     gem install passenger --no-ri --no-rdoc
     passenger-install-nginx-module --auto --auto-download --prefix="/usr/local/nginx"
+    #set up nginx
+    ln -s /usr/local/nginx/sbin/nginx /usr/local/sbin
+    wget https://raw.github.com/simpx/scripts/master/nginx
+    mv nginx /etc/init.d/nginx
+    chmod +x /etc/init.d/nginx
+    # Start nginx during boot and stop during shutdown
+    update-rc.d -f nginx defaults
 
 # Install git
     echo "Installing Git"
