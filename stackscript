@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+# See: https://github.com/simpx/scripts/blob/master/stackscript
 # Install: Ruby 1.9.3, Nodejs 0.6.14, Mongodb and Nginx with Passenger
 # Reference: https://www.linode.com/stackscripts/view/?StackScriptID=1291
 #
