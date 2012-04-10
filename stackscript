@@ -36,6 +36,34 @@ exec &> /root/stackscript.log
     cd ..
     echo "Nodejs installed"
 
+# Install Redis
+    export REDIS_VERSION="redis-2.4.10"
+    echo "Installing Redis $REDIS_VERSION"
+    echo "Downloading: (from calling wget http://redis.googlecode.com/files/$REDIS_VERSION.tar.gz)"
+    wget http://redis.googlecode.com/files/$REDIS_VERSION.tar.gz
+    tar xzf $REDIS_VERSION.tar.gz
+    cd $REDIS_VERSION
+    ./configure
+    make
+    make install
+    # Download Configuration for redis
+    echo "Downloading Configuration files"
+    wget https://raw.github.com/simpx/scripts/master/redis.conf
+    wget https://raw.github.com/simpx/scripts/master/redis-server
+    mv redis-server /etc/init.d/redis-server
+    chmod +x /etc/init.d/redis-server
+    mv redis.conf /etc/redis.conf
+    # Add redis user
+    echo "Add Redis user"
+    mkdir -p /var/lib/redis
+    mkdir -p /var/log/redis
+    useradd --system --home-dir /var/lib/redis redis
+    chown redis.redis /var/lib/redis
+    chown redis.redis /var/log/redis
+    # Start redis-server during boot and stop during shutdown
+    update-rc.d redis-server defaults
+    cd ..
+
 # Installing Ruby
     export RUBY_VERSION="ruby-1.9.3-p125"
     echo "Installing Ruby $RUBY_VERSION"
