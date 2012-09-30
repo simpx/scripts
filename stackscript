@@ -15,7 +15,7 @@ exec &> /root/stackscript.log
     cd /tmp
     echo "Start to install! Good Luck!"
     system_update
-    apt-get -y install build-essential zlib1g-dev libssl-dev libreadline5-dev openssh-server libyaml-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libpcre3 libpcre3-dev
+    apt-get -y install build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev openssh-server libyaml-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libpcre3 libpcre3-dev
     goodstuff
     echo "Essentials installed"
 
@@ -66,7 +66,7 @@ exec &> /root/stackscript.log
     cd ..
 
 # Installing Ruby
-    export RUBY_VERSION="ruby-1.9.3-p125"
+    export RUBY_VERSION="ruby-1.9.3-p194"
     echo "Installing Ruby $RUBY_VERSION"
     echo "Downloading: (from calling wget http://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz)"
     wget http://ftp.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.gz
