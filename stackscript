@@ -1,26 +1,30 @@
 #!/bin/bash
 #
 # See: https://github.com/simpx/scripts/blob/master/stackscript
-# Install: Ruby 1.9.3, Nodejs 0.6.14, Mongodb and Nginx with Passenger
+# Install: Ruby 1.9.3, Nodejs 0.8.15, Mongodb and Nginx
 # Reference: https://www.linode.com/stackscripts/view/?StackScriptID=1291
 #
 # <UDF name="rr_env" Label="Rails/Rack environment to run" default="production" />
 # <UDF name="deploy_user" Label="Username of deploy user" default="deploy" />
-
-source <ssinclude StackScriptID=1>
+# <UDF name="deploy_psw" Label="Password of deploy user" default="" />
 
 exec &> /root/stackscript.log
 
 # Update packages and install essentials
     cd /tmp
     echo "Start to install! Good Luck!"
-    system_update
+    apt-get update
+    apt-get -y install aptitude
+    aptitude -y full-upgrade
     apt-get -y install build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev openssh-server libyaml-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libpcre3 libpcre3-dev
-    goodstuff
+    aptitude -y install wget vim less
+    sed -i -e 's/^#PS1=/PS1=/' /root/.bashrc # enable the colorful root bash prompt
+    sed -i -e "s/^#alias ll='ls -l'/alias ll='ls -al'/" /root/.bashrc # enable ll list long alias <3
+    echo "alias cl='clear&&ls'" >> /root/.bashrc
     echo "Essentials installed"
 
 # Install nodejs for javascript runtime
-    export NODEJS_VERSION="v0.6.14"
+    export NODEJS_VERSION="v0.8.15"
     echo "Installing Nodejs $NODEJS_VERSION"
     echo "Downloading: (from calling wget http://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION.tar.gz)"
     wget http://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION.tar.gz
@@ -38,7 +42,7 @@ exec &> /root/stackscript.log
     echo "Nodejs installed"
 
 # Install Redis
-    export REDIS_VERSION="redis-2.4.10"
+    export REDIS_VERSION="redis-2.6.7"
     echo "Installing Redis $REDIS_VERSION"
     echo "Downloading: (from calling wget http://redis.googlecode.com/files/$REDIS_VERSION.tar.gz)"
     wget http://redis.googlecode.com/files/$REDIS_VERSION.tar.gz
@@ -83,15 +87,23 @@ exec &> /root/stackscript.log
     cd ..
     echo "Ruby installed!"
 
-# Set up Nginx and Passenger
-    echo "Installing Nginx and Passenger"
-    gem install passenger --no-ri --no-rdoc
-    passenger-install-nginx-module --auto --auto-download --prefix="/usr/local/nginx"
-    #set up nginx
+# Set up Nginx
+    export NGINX_VERSION="nginx-1.2.5"
+    echo "Installing Nginx $NGINX_VERSION"
+    echo "Downloading: (from calling wget http://nginx.org/download/$NGINX_VERSION.tar.gz)"
+    wget http://nginx.org/download/$NGINX_VERSION.tar.gz
+    echo "tar output:"
+    tar xzf $NGINX_VERSION.tar.gz
+    cd $NGINX_VERSION
+    echo "current directory: `pwd`"
+    ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module
+    make
+    make install
     ln -s /usr/local/nginx/sbin/nginx /usr/local/sbin
     wget https://raw.github.com/simpx/scripts/master/nginx
     mv nginx /etc/init.d/nginx
     chmod +x /etc/init.d/nginx
+    cd ..
     # Start nginx during boot and stop during shutdown
     update-rc.d -f nginx defaults
 
@@ -126,9 +138,21 @@ EOF
     apt-get update
     apt-get install mongodb-10gen
 
+# Install mosh
+    apt-get -y install python-software-properties
+    add-apt-repository -y ppa:keithw/mosh
+    apt-get update
+    apt-get -y install mosh
+
 # Add deploy user
+    if [ ! -n "$DEPLOY_USER" ]; then
+        DEPLOY_USER="deploy"
+    fi
+    if [ ! -n "$DEPLOY_PSW" ]; then
+        DEPLOY_PSW="hackyixia"
+    fi
     echo "Add deploy user: $DEPLOY_USER"
-    echo "$DEPLOY_USER:$DEPLOY_USER:1000:1000::/home/$DEPLOY_USER:/bin/bash" | newusers
+    echo "$DEPLOY_USER:$DEPLOY_PSW:1000:1000::/home/$DEPLOY_USER:/bin/bash" | newusers
     cp -a /etc/skel/.[a-z]* /home/$DEPLOY_USER/
     chown -R $DEPLOY_USER /home/$DEPLOY_USER
     # Add to sudoers without password
