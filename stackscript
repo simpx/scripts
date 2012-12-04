@@ -149,16 +149,16 @@ EOF
     easy_install supervisor
     mkdir -p /etc/supervisor/conf.d
     mkdir -p /var/log/supervisor
-    wget -P /etc/supervisor https://raw.github.com/simpx/scripts/master/supervisord.conf
+    wget -P /etc https://raw.github.com/simpx/scripts/master/supervisord.conf
     wget -P /etc/supervisor/conf.d https://raw.github.com/simpx/scripts/master/supervisor-sample.conf
-    supervisord -c /etc/supervisor/supervisord.conf
+    supervisord
 
 # Add deploy user
     if [ ! -n "$DEPLOY_USER" ]; then
         DEPLOY_USER="deploy"
     fi
     if [ ! -n "$DEPLOY_PSW" ]; then
-        DEPLOY_PSW="hackyixia"
+        DEPLOY_PSW="OMG_ITS_MY_PASSWORD!"
     fi
     echo "Add deploy user: $DEPLOY_USER"
     echo "$DEPLOY_USER:$DEPLOY_PSW:1000:1000::/home/$DEPLOY_USER:/bin/bash" | newusers
