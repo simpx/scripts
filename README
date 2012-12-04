@@ -1,0 +1,1 @@
+bash <(curl -s https://raw.github.com/simpx/scripts/master/stackscript)
