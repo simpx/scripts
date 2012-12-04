@@ -144,6 +144,12 @@ EOF
     apt-get update
     apt-get -y install mosh
 
+# Install supervisor
+    apt-get -y install python-setuptools
+    easy_install supervisor
+    mkdir -p /etc/supervisor/conf.d
+    wget https://raw.github.com/simpx/scripts/master/supervisord.conf
+
 # Add deploy user
     if [ ! -n "$DEPLOY_USER" ]; then
         DEPLOY_USER="deploy"
@@ -157,6 +163,12 @@ EOF
     chown -R $DEPLOY_USER /home/$DEPLOY_USER
     # Add to sudoers without password
     echo "$DEPLOY_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# Goodstuff
+    sed -i -e 's/^#PS1=/PS1=/' /home/$DEPLOY_USER/.bashrc # enable the colorful bash prompt
+    sed -i -e "s/^#alias ll='ls -l'/alias ll='ls -al'/" /home/$DEPLOY_USER/.bashrc # enable ll list long alias <3
+    echo "alias cl='clear&&ls -p'" >> /home/$DEPLOY_USER/.bashrc
+    echo "alias s='sudo supervisorctl'" >> /home/$DEPLOY_USER/.bashrc
 
 # Finished
     echo "StackScript Finished!"
